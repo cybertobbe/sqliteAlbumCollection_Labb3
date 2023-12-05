@@ -48,9 +48,9 @@ public class Main {
 
                   // loop through the result set
                   while (rs.next()) {
-                        System.out.println(rs.getInt("artistId") +  "\t" +
-                                rs.getString("artistName") + "\t" +
-                                rs.getString("artistFounded") + "\t" +
+                        System.out.println(rs.getInt("artistId") +  "\t\t" +
+                                rs.getString("artistName") + "\t\t" +
+                                rs.getString("artistFounded") + "\t\t" +
                                 rs.getString("artistGenreId"));
                   }
             } catch (SQLException e) {
@@ -58,15 +58,32 @@ public class Main {
             }
       }
 
-      private static void insert(String artistName, int artistFounded, int artistGenreId) {
+      private static void insert() {
+
+            //ArtistGenreID convert from text input  to  int
+            //int artistGenre = 0;
+
+            System.out.println("Ny artist: ");
+            String artist = scanner.nextLine();
+            System.out.println("Artist grundades: ");
+            int artistFounded = scanner.nextInt();
+            System.out.println("Genre: ");
+            int artistGenreId = scanner.nextInt();
+            scanner.nextLine();
+
+
+
             String sql = "INSERT INTO artist(artistName, artistFounded, artistGenreId) VALUES(?,?,?)";
 
-            try{
-                  Connection conn = connect();
-                  PreparedStatement pstmt = conn.prepareStatement(sql);
-                  pstmt.setString(1, artistName);
+            try (Connection conn = connect();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                  // set the corresponding param
+                  pstmt.setString(1, artist);
                   pstmt.setInt(2, artistFounded);
                   pstmt.setInt(3, artistGenreId);
+
+                  // update
                   pstmt.executeUpdate();
                   System.out.println("Du har lagt till en ny artist");
             } catch (SQLException e) {
@@ -74,26 +91,39 @@ public class Main {
             }
       }
 
-      private static void update(String forfattare, String titel, int pris, int id) {
-            String sql = "UPDATE bok SET bokForfattare = ? , "
-                    + "bokTitel = ? , "
-                    + "bokPris = ? "
-                    + "WHERE bokId = ?";
+      private static void update() {
+            System.out.println("Artist att uppdatera: ");
+            String artistName = scanner.nextLine();
+            System.out.println("Vilken genre: ");
+            String artistGenre = scanner.nextLine();
+            int artistGenreId = 0;//anrop till if metod
+
+            artistGenreId = genreCheck(artistGenre, artistGenreId);
+
+            String sql = "UPDATE artist SET artistGenreId = ? WHERE artistName = ?";
 
             try (Connection conn = connect();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                   // set the corresponding param
-                  pstmt.setString(1, forfattare);
-                  pstmt.setString(2, titel);
-                  pstmt.setInt(3, pris);
-                  pstmt.setInt(4, id);
+                  pstmt.setInt(1, artistGenreId);
+                  pstmt.setString(2, artistName);
                   // update
                   pstmt.executeUpdate();
-                  System.out.println("Du har uppdaterat vald bok");
+                  System.out.println("Du har uppdaterat vald artist");
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
+      }
+
+      private static int genreCheck(String artistGenre, int artistGenreId) {
+            if(artistGenre.equals("Pop")) {
+                  artistGenreId = 1;
+            }
+            else if(artistGenre.equals("Rock")){
+                  artistGenreId = 2;
+            }
+            return artistGenreId;
       }
 
       private static void delete(int id) {
@@ -132,11 +162,11 @@ public class Main {
                               break;
 
                         case 2:
-                              insert("Van Halen", 1975, 2);
+                              insert();
                               break;
 
                         case 3:
-                              update("Bilbo", "Tolkien, J.R.R", 100, 1);
+                              update();
                               break;
 
                         case 4:
