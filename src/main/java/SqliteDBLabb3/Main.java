@@ -60,9 +60,6 @@ public class Main {
 
       private static void insert() {
 
-            //ArtistGenreID convert from text input  to  int
-            //int artistGenre = 0;
-
             System.out.println("Ny artist: ");
             String artist = scanner.nextLine();
             System.out.println("Artist grundades: ");
@@ -70,7 +67,6 @@ public class Main {
             System.out.println("Genre: ");
             int artistGenreId = scanner.nextInt();
             scanner.nextLine();
-
 
 
             String sql = "INSERT INTO artist(artistName, artistFounded, artistGenreId) VALUES(?,?,?)";
