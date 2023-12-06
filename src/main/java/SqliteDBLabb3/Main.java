@@ -2,14 +2,45 @@ package SqliteDBLabb3;
 
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
 
       private static Scanner scanner = new Scanner(System.in);
 
+
+      public static void main(String[] args) {
+
+            boolean quit = false;
+            printActions();
+            while(!quit) {
+                  System.out.println("\nChoose:(7 to show menu)");
+                  int action = scanner.nextInt();
+                  scanner.nextLine();
+
+                  switch (action) {
+                        case 0 -> {
+                              System.out.println("\nShutting down...");
+                              quit = true;
+                        }
+                        case 1 -> selectAllArtists();
+                        case 2 -> insertArtist();
+                        case 3 -> updateArtist();
+                        case 4 -> deleteArtist();
+                        case 5 -> showAllGenres();
+                        case 6 -> joinTables();
+                        case 7 -> printActions();
+                  }
+            }
+
+      }
+
+
+
+
+
       private static Connection connect() {
-            // SQLite connection string
             String url = "jdbc:sqlite:C:\\Users\\cyber\\sqlite\\albumCollectionJDBC\\Labb3.db";
             Connection conn = null;
             try {
@@ -22,24 +53,23 @@ public class Main {
 
       private static void printActions() {
             System.out.println("\nChoose:\n");
-            System.out.println("0  - Shutdown\n" +
-                    "1  - Show all artists\n" +
-                    "2  - Add new artist\n" +
-                    "3  - Update artist with new genre\n" +
-                    "4  - Remove artist\n" +
-                    "5  - Show all genres\n" +
-                    "6  - Add new genre\n" +
-                    "7  - Join tables\n" +
-                    "8  - Show menu");
+            System.out.println("""
+                    0  - Shutdown
+                    1  - Show all artists
+                    2  - Add new artist
+                    3  - Update artist with new genre
+                    4  - Remove artist
+                    5  - Show all genres
+                    6  - Visa artist och genre(Join)
+                    7  - Show menu""");
 
       }
 
-
       private static void deleteArtist(){
-            System.out.println("Skriv in namet på artisten som ska tas bort: ");
+            System.out.println("Artist to delete: ");
             String artistName = scanner.nextLine();
             deleteArtist(artistName);
-            scanner.nextLine();
+
       }
 
       private static void selectAllArtists(){
@@ -50,7 +80,8 @@ public class Main {
                   Statement stmt  = conn.createStatement();
                   ResultSet rs    = stmt.executeQuery(sql);
 
-                  // loop through the result set
+
+
                   while (rs.next()) {
                         System.out.println(rs.getInt("artistId") +  "\t\t\t\t" +
                                 rs.getString("artistName") + "\t\t\t\t" +
@@ -64,13 +95,20 @@ public class Main {
 
       private static void insertArtist() {
 
-            System.out.println("Ny artist: ");
+            System.out.println("New artist: ");
             String artist = scanner.nextLine();
-            System.out.println("Artist grundades: ");
+            System.out.println("Artist founded: ");
             int artistFounded = scanner.nextInt();
-            System.out.println("Genre: ");
-            int artistGenreId = scanner.nextInt();
             scanner.nextLine();
+            System.out.println("Genre: ");
+            String artistGenre = scanner.nextLine();
+
+
+            int artistGenreId = 0;
+
+            //Call method to convert genre to genreId
+            artistGenreId = genreConversion(artistGenre, artistGenreId);
+
 
 
             String sql = "INSERT INTO artist(artistName, artistFounded, artistGenreId) VALUES(?,?,?)";
@@ -85,7 +123,7 @@ public class Main {
 
                   // update
                   pstmt.executeUpdate();
-                  System.out.println("Du har lagt till en ny artist " + artist);
+                  System.out.println("You have added a new artist " + artist);
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
@@ -101,6 +139,7 @@ public class Main {
             //Call method to convert genre to genreId
             artistGenreId = genreConversion(artistGenre, artistGenreId);
 
+
             String sql = "UPDATE artist SET artistGenreId = ? WHERE artistName = ?";
 
             try (Connection conn = connect();
@@ -111,21 +150,33 @@ public class Main {
                   pstmt.setString(2, artistName);
                   // update
                   pstmt.executeUpdate();
-                  System.out.println("Du har uppdaterat vald artist");
+                  System.out.println("You have updated artist " + artistName + " with genre " + artistGenre);
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
       }
 
+
       private static int genreConversion(String artistGenre, int artistGenreId) {
+
+
             if(artistGenre.equals("Pop")) {
                   artistGenreId = 1;
             }
             else if(artistGenre.equals("Rock")){
                   artistGenreId = 2;
             }
+            else if(artistGenre.equals("Jazz")){
+                  artistGenreId = 3;
+            }
+            else if(artistGenre.equals("Blues")){
+                  artistGenreId = 4;
+            }
+
             return artistGenreId;
       }
+
+
 
       private static void deleteArtist(String artistName){
 
@@ -138,69 +189,11 @@ public class Main {
                   pstmt.setString(1, artistName);
                   // execute the delete statement
                   pstmt.executeUpdate();
-                  System.out.println("Du har tagit bort artist " + artistName);
+                  System.out.println("You have removed artist " + artistName);
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
       }
-
-
-      public static void main(String[] args) {
-
-            boolean quit = false;
-            printActions();
-            while(!quit) {
-                  System.out.println("\nChoose:");
-                  int action = scanner.nextInt();
-                  scanner.nextLine();
-
-                  switch (action) {
-                        case 0:
-                              System.out.println("\nShutting down...");
-                              quit = true;
-                              break;
-
-                        case 1:
-                              selectAllArtists();
-                              break;
-
-                        case 2:
-                              insertArtist();
-                              break;
-
-                        case 3:
-                              updateArtist();
-                              break;
-
-                        case 4:
-
-                              deleteArtist();
-                              break;
-
-                        case 5:
-
-                              showAllGenres();
-                              break;
-
-                        case 6:
-
-                              insertGenre();
-                              break;
-
-                        case 7:
-
-                              joinTables();
-                              break;
-
-                        case 8:
-
-                              printActions();
-                              break;
-                  }
-            }
-
-      }
-
       private static void joinTables() {
             String sql = "SELECT artist.artistName, genre.genreName FROM artist INNER JOIN genre ON artist.artistGenreId = genre.genreId";
 
@@ -238,24 +231,6 @@ public class Main {
       }
 
 
-      private static void insertGenre() {
-            System.out.println("New genre: ");
-            String genre = scanner.nextLine();
 
-            String sql = "INSERT INTO genre(genreName) VALUES(?)";
-
-            try (Connection conn = connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                  // set the corresponding param
-                  pstmt.setString(1, genre);
-
-                  // update
-                  pstmt.executeUpdate();
-                  System.out.println("You have addad a new genre: " + genre);
-            } catch (SQLException e) {
-                  System.out.println(e.getMessage());
-            }
-      }
 
 }
