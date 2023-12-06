@@ -2,7 +2,6 @@ package SqliteDBLabb3;
 
 
 import java.sql.*;
-import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
@@ -13,15 +12,15 @@ public class Main {
       public static void main(String[] args) {
 
             boolean quit = false;
-            printActions();
+            showMenu();
             while(!quit) {
                   System.out.println("\nChoose:(7 to show menu)");
-                  int action = scanner.nextInt();
+                  int menyChoise = scanner.nextInt();
                   scanner.nextLine();
 
-                  switch (action) {
+                  switch (menyChoise) {
                         case 0 -> {
-                              System.out.println("\nShutting down...");
+                              System.out.println("\nShutting down..");
                               quit = true;
                         }
                         case 1 -> selectAllArtists();
@@ -30,14 +29,11 @@ public class Main {
                         case 4 -> deleteArtist();
                         case 5 -> showAllGenres();
                         case 6 -> joinTables();
-                        case 7 -> printActions();
+                        case 7 -> showMenu();
                   }
             }
 
       }
-
-
-
 
 
       private static Connection connect() {
@@ -51,7 +47,7 @@ public class Main {
             return conn;
       }
 
-      private static void printActions() {
+      private static void showMenu() {
             System.out.println("\nChoose:\n");
             System.out.println("""
                     0  - Shutdown
@@ -60,7 +56,7 @@ public class Main {
                     3  - Update artist with new genre
                     4  - Remove artist
                     5  - Show all genres
-                    6  - Visa artist och genre(Join)
+                    6  - Show artist and genre(Join)
                     7  - Show menu""");
 
       }
@@ -80,14 +76,16 @@ public class Main {
                   Statement stmt  = conn.createStatement();
                   ResultSet rs    = stmt.executeQuery(sql);
 
-
-
+                  System.out.println(String.format("%-10s %-20s %-15s %-15s", "artistId", "artistName", "artistFounded", "artistGenreId"))
+                  ;
                   while (rs.next()) {
-                        System.out.println(rs.getInt("artistId") +  "\t\t\t\t" +
-                                rs.getString("artistName") + "\t\t\t\t" +
-                                rs.getString("artistFounded") + "\t\t\t\t" +
-                                rs.getString("artistGenreId"));
+                        System.out.println(String.format("%-10d %-20s %-15s %-15s",
+                                rs.getInt("artistId"),
+                                rs.getString("artistName"),
+                                rs.getString("artistFounded"),
+                                rs.getString("artistGenreId")));
                   }
+
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
@@ -202,10 +200,11 @@ public class Main {
                   Statement stmt  = conn.createStatement();
                   ResultSet rs    = stmt.executeQuery(sql);
 
-                  // loop through the result set
+                  System.out.println(String.format("%-20s %-35s", "artistName", "genreName"));
                   while (rs.next()) {
-                        System.out.println(rs.getString("artistName") +  "\t\t\t\t" +
-                                rs.getString("genreName"));
+                        System.out.println(String.format("%-20s %-35s",
+                                rs.getString("artistName"),
+                                rs.getString("genreName")));
                   }
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
@@ -220,17 +219,16 @@ public class Main {
                   Statement stmt  = conn.createStatement();
                   ResultSet rs    = stmt.executeQuery(sql);
 
-
+                  System.out.println(String.format("%-10s %-20s", "genreId", "genreName"));
                   while (rs.next()) {
-                        System.out.println(rs.getInt("genreId") +  "\t\t\t\t" +
-                                rs.getString("genreName"));
+                        System.out.println(String.format("%-10s %-20s",
+                                rs.getInt("genreId"),
+                                rs.getString("genreName")));
                   }
+
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
       }
-
-
-
 
 }
