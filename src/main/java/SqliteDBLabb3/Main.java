@@ -21,24 +21,28 @@ public class Main {
       }
 
       private static void printActions() {
-            System.out.println("\nVälj:\n");
-            System.out.println("0  - Stäng av\n" +
-                    "1  - Visa alla böcker\n" +
-                    "2  - Lägga till en ny bok\n" +
-                    "3  - Uppdatera en bok\n" +
-                    "4  - Ta bort en bok\n" +
-                    "5  - Visa en lista över alla val.");
+            System.out.println("\nChoose:\n");
+            System.out.println("0  - Shutdown\n" +
+                    "1  - Show all artists\n" +
+                    "2  - Add new artist\n" +
+                    "3  - Update artist with new genre\n" +
+                    "4  - Remove artist\n" +
+                    "5  - Show all genres\n" +
+                    "6  - Add new genre\n" +
+                    "7  - Join tables\n" +
+                    "8  - Show menu");
+
       }
 
 
-      private static void deleteBook(){
-            System.out.println("Skriv in id:t på boken som ska tas bort: ");
-            int inputId = scanner.nextInt();
-            delete(inputId);
+      private static void deleteArtist(){
+            System.out.println("Skriv in namet på artisten som ska tas bort: ");
+            String artistName = scanner.nextLine();
+            deleteArtist(artistName);
             scanner.nextLine();
       }
 
-      private static void selectAll(){
+      private static void selectAllArtists(){
             String sql = "SELECT * FROM artist";
 
             try {
@@ -48,9 +52,9 @@ public class Main {
 
                   // loop through the result set
                   while (rs.next()) {
-                        System.out.println(rs.getInt("artistId") +  "\t\t" +
-                                rs.getString("artistName") + "\t\t" +
-                                rs.getString("artistFounded") + "\t\t" +
+                        System.out.println(rs.getInt("artistId") +  "\t\t\t\t" +
+                                rs.getString("artistName") + "\t\t\t\t" +
+                                rs.getString("artistFounded") + "\t\t\t\t" +
                                 rs.getString("artistGenreId"));
                   }
             } catch (SQLException e) {
@@ -58,7 +62,7 @@ public class Main {
             }
       }
 
-      private static void insert() {
+      private static void insertArtist() {
 
             System.out.println("Ny artist: ");
             String artist = scanner.nextLine();
@@ -81,20 +85,21 @@ public class Main {
 
                   // update
                   pstmt.executeUpdate();
-                  System.out.println("Du har lagt till en ny artist");
+                  System.out.println("Du har lagt till en ny artist " + artist);
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
       }
 
-      private static void update() {
-            System.out.println("Artist att uppdatera: ");
+      private static void updateArtist() {
+            System.out.println("Artist to update: ");
             String artistName = scanner.nextLine();
-            System.out.println("Vilken genre: ");
+            System.out.println("What genre: ");
             String artistGenre = scanner.nextLine();
-            int artistGenreId = 0;//anrop till if metod
+            int artistGenreId = 0;
 
-            artistGenreId = genreCheck(artistGenre, artistGenreId);
+            //Call method to convert genre to genreId
+            artistGenreId = genreConversion(artistGenre, artistGenreId);
 
             String sql = "UPDATE artist SET artistGenreId = ? WHERE artistName = ?";
 
@@ -112,7 +117,7 @@ public class Main {
             }
       }
 
-      private static int genreCheck(String artistGenre, int artistGenreId) {
+      private static int genreConversion(String artistGenre, int artistGenreId) {
             if(artistGenre.equals("Pop")) {
                   artistGenreId = 1;
             }
@@ -122,60 +127,135 @@ public class Main {
             return artistGenreId;
       }
 
-      private static void delete(int id) {
-            String sql = "DELETE FROM artist WHERE artistId = ?";
+      private static void deleteArtist(String artistName){
+
+            String sql = "DELETE FROM artist WHERE artistName = ?";
 
             try (Connection conn = connect();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                   // set the corresponding param
-                  pstmt.setInt(1, id);
+                  pstmt.setString(1, artistName);
                   // execute the delete statement
                   pstmt.executeUpdate();
-                  System.out.println("Du har tagit bort artist");
+                  System.out.println("Du har tagit bort artist " + artistName);
             } catch (SQLException e) {
                   System.out.println(e.getMessage());
             }
       }
+
 
       public static void main(String[] args) {
 
             boolean quit = false;
             printActions();
             while(!quit) {
-                  System.out.println("\nVälj (5 för att visa val):");
+                  System.out.println("\nChoose:");
                   int action = scanner.nextInt();
                   scanner.nextLine();
 
                   switch (action) {
                         case 0:
-                              System.out.println("\nStänger ner...");
+                              System.out.println("\nShutting down...");
                               quit = true;
                               break;
 
                         case 1:
-                              selectAll();
+                              selectAllArtists();
                               break;
 
                         case 2:
-                              insert();
+                              insertArtist();
                               break;
 
                         case 3:
-                              update();
+                              updateArtist();
                               break;
 
                         case 4:
-                              //delete(1);
-                              deleteBook();
+
+                              deleteArtist();
                               break;
 
                         case 5:
+
+                              showAllGenres();
+                              break;
+
+                        case 6:
+
+                              insertGenre();
+                              break;
+
+                        case 7:
+
+                              joinTables();
+                              break;
+
+                        case 8:
+
                               printActions();
                               break;
                   }
             }
 
+      }
+
+      private static void joinTables() {
+            String sql = "SELECT artist.artistName, genre.genreName FROM artist INNER JOIN genre ON artist.artistGenreId = genre.genreId";
+
+            try {
+                  Connection conn = connect();
+                  Statement stmt  = conn.createStatement();
+                  ResultSet rs    = stmt.executeQuery(sql);
+
+                  // loop through the result set
+                  while (rs.next()) {
+                        System.out.println(rs.getString("artistName") +  "\t\t\t\t" +
+                                rs.getString("genreName"));
+                  }
+            } catch (SQLException e) {
+                  System.out.println(e.getMessage());
+            }
+      }
+
+      private static void showAllGenres() {
+            String sql = "SELECT * FROM genre";
+
+            try {
+                  Connection conn = connect();
+                  Statement stmt  = conn.createStatement();
+                  ResultSet rs    = stmt.executeQuery(sql);
+
+
+                  while (rs.next()) {
+                        System.out.println(rs.getInt("genreId") +  "\t\t\t\t" +
+                                rs.getString("genreName"));
+                  }
+            } catch (SQLException e) {
+                  System.out.println(e.getMessage());
+            }
+      }
+
+
+      private static void insertGenre() {
+            System.out.println("New genre: ");
+            String genre = scanner.nextLine();
+
+            String sql = "INSERT INTO genre(genreName) VALUES(?)";
+
+            try (Connection conn = connect();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                  // set the corresponding param
+                  pstmt.setString(1, genre);
+
+                  // update
+                  pstmt.executeUpdate();
+                  System.out.println("You have addad a new genre: " + genre);
+            } catch (SQLException e) {
+                  System.out.println(e.getMessage());
+            }
       }
 
 }
