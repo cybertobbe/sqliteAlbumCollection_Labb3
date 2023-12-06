@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Main {
 
-      private static Scanner scanner = new Scanner(System.in);
+      private static final Scanner scanner = new Scanner(System.in);
 
 
       public static void main(String[] args) {
@@ -15,10 +15,10 @@ public class Main {
             showMenu();
             while(!quit) {
                   System.out.println("\nChoose:(7 to show menu)");
-                  int menyChoise = scanner.nextInt();
+                  int menyChoice = scanner.nextInt();
                   scanner.nextLine();
 
-                  switch (menyChoise) {
+                  switch (menyChoice) {
                         case 0 -> {
                               System.out.println("\nShutting down..");
                               quit = true;
